@@ -1,0 +1,73 @@
+:root[data-theme="dark"] {
+  --bg-secondary:#07100d; --bg-card:#0c1417; --bg-tertiary:#172227;
+  --text-primary:#ecf3f5; --text-quaternary:#afbec4; --text-faint:#8b9da5;
+  --border-color:#28383d; --accent:#84d8ed; --accent-contrast:#0b1a20;
+  --success:#6ed6a6; --warning:#e9bb71; --error:#ef8a9b; --info:#84d8ed;
+}
+body { font-size:13px; }
+.wrap { padding-bottom:0; }
+.icon-defs { position:absolute; width:0; height:0; overflow:hidden; }
+.control-icon { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+.top { padding:4px 0 12px; gap:12px; }
+.pill { padding:5px 0; border:0; border-radius:0; background:transparent; color:var(--text-quaternary); font-weight:500; }
+.dot { width:6px; height:6px; animation:none; }
+.pill:has(#pillT:not(:empty)) { min-width:100px; }
+.ctl { gap:8px; }
+.ctl .seg { margin:0; padding:3px; gap:1px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-card); }
+.ctl .seg button { min-width:40px; min-height:30px; padding:4px 10px; border-radius:3px; color:var(--text-faint); font-size:12px; }
+.ctl .seg button[aria-pressed="true"] { color:var(--accent); background:#20333d; }
+.ctl .btn { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; padding:0; border:1px solid var(--border-color); border-radius:6px; color:var(--text-quaternary); background:var(--bg-card); }
+.ctl .btn[aria-pressed="true"] { background:#20333d; color:var(--accent); border-color:#446578; }
+.ctl button { transition:color 120ms ease-out,background-color 120ms ease-out; }
+.ctl button:hover { color:var(--text-primary); background:var(--bg-tertiary); }
+.chips { gap:0; margin:0 0 20px; padding:16px 0; border-block:1px solid var(--border-color); }
+.chip { border:0; padding:0 20px; background:transparent; }
+.chip + .chip { border-left:1px solid var(--border-color); }
+.chip:first-child { padding-left:0; }
+.chip small { min-height:22px; color:var(--text-faint); font-size:11px; }
+.chip b { font-family:inherit; font-size:22px; line-height:1.4; font-weight:550; font-variant-numeric:tabular-nums; }
+#cInf { color:var(--info); }
+#cOk { color:var(--success); }
+.main { gap:20px; grid-template-columns:minmax(0,1fr) 260px; }
+.mainp { border:0; background:transparent; }
+.phead { min-height:46px; padding:0 0 10px; border:0; gap:16px; }
+.phead .seg { padding:3px; border-radius:6px; background:var(--bg-card); }
+.phead .seg button { border:0; border-radius:3px; background:transparent; color:var(--text-faint); padding:5px 14px; }
+.phead .seg button[aria-pressed="true"] { background:#20333d; color:var(--accent); }
+#rangeInfo { margin-left:auto; font-size:11px; color:var(--text-faint); }
+.box { border:1px solid var(--border-color); border-radius:7px; background:var(--bg-card); }
+.box + .box { margin-top:12px; }
+.feed { margin-top:0; padding-left:18px; }
+.feed h2 { padding:12px 0 17px; font-size:12px; font-weight:600; border:0; }
+.feed h2 span { font-size:10px; }
+.row { padding:12px 0; border-color:#213035; }
+.tm { font-size:10px; }
+.cl { font-size:11px; }
+.st { display:inline-flex; align-items:center; gap:4px; padding:0; border:0; border-radius:0; background:transparent !important; font-size:10px; }
+.st::before { content:""; width:4px; height:4px; background:currentColor; border-radius:50%; }
+.r2 { margin-top:5px; font-size:11px; }
+.r3 { margin-top:5px; font-size:10px; }
+.connection-error { border-left-width:1px; }
+.tip { border-radius:6px; box-shadow:0 8px 24px #0005; }
+@media(max-width:1150px) {
+  .main { grid-template-columns:minmax(0,1fr); gap:20px; }
+  .feed { padding-left:0; border-left:0; }
+  #list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 24px; }
+}
+@media(max-width:600px) {
+  .top { gap:10px; padding-top:4px; }
+  .ctl { gap:4px; }
+  .ctl .seg button { min-width:26px; padding-inline:5px; font-size:11px; }
+  .ctl .seg { border:1px solid var(--border-color); padding:2px; }
+  .ctl .btn { width:36px; height:36px; }
+  .chips { grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px 0; padding:14px 0; margin-bottom:12px; }
+  .chip { padding:0 10px; }
+  .chip b { font-size:19px; }
+  .chip:nth-child(4) { padding-left:0; border-left:0; }
+  .chip:last-child { grid-column:auto; }
+  .chip small { font-size:10px; }
+  .phead { gap:8px; }
+  .phead .seg button { padding-inline:12px; }
+  #list { grid-template-columns:minmax(0,1fr); }
+}
+@media(prefers-reduced-motion:reduce) { .ctl button { transition:none; } }

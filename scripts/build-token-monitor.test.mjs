@@ -17,14 +17,15 @@ test('the integrated page has valid JavaScript and a credential-free data adapte
   assert.match(script, /controller\.abort\(\)/);
 });
 
-test('request flights and return animation use the exact upstream algorithms', () => {
+test('the data contract and flow layout retain the upstream algorithms', () => {
   const extract = (source, start, end) => source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start)));
   for (const [start, end] of [
-    ['function trackFlight(', '/* ---------- flow model'],
-    ['function drawFlights()', 'function drawFlow('],
+    ['function buildPath(', '/* ---------- canvas setup'],
+    ['function layoutFlow()', '/* requests travel right to left'],
+    ['async function loadSnapshot()', 'async function applyEvents('],
   ]) {
     const original = extract(upstream, start, end);
-    assert.ok(original.length > 200);
+    assert.ok(original.length > 200, start);
     assert.equal(extract(generated, start, end), original);
   }
 });

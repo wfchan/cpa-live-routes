@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
-// Keep the upstream Canvas renderer intact; customize its shell and data adapter.
+// Keep upstream data/layout behavior; layer Token Monitor motion and presentation on top.
 let html = await readFile(new URL('../web/index.html', import.meta.url), 'utf8');
 function replace(old, value) {
   if (!html.includes(old)) throw new Error(`Upstream integration point changed: ${old.slice(0, 80)}`);
@@ -62,8 +62,39 @@ section('function login() {', '/* ---------- demo mode', '');
 replace("  managementKey = loadKey(); if (managementKey) $('#bOut').hidden = false;\n", '');
 // A natural-height document lets React own scrolling, with no nested scroll area.
 section('function measureFill() {', '\nconst flights', 'function measureFill() { return 0; }\n');
+const motion = await readFile(new URL('../web/token-monitor-motion.js', import.meta.url), 'utf8');
+const motionSections = Object.fromEntries([...motion.matchAll(/\/\* @section (\w+) \*\/\n([\s\S]*?)(?=\/\* @section |$)/g)].map((m) => [m[1], m[2]]));
+for (const [name, start, end] of [
+  ['trackFlight', 'function trackFlight(', '/* ---------- flow model'],
+  ['drawLinks', 'function drawLinks()', 'function nodeBox('],
+  ['drawFlights', 'function drawFlights()', 'function drawFlow('],
+  ['drawFlow', 'function drawFlow(', '/* flow interaction */'],
+  ['loop', 'function loop()', 'function render()'],
+]) {
+  if (!motionSections[name]) throw new Error(`Missing motion section: ${name}`);
+  section(start, end, motionSections[name] + '\n');
+}
+replace('const flights = new Map(), fx = [], flash = new Map();', motionSections.helpers + '\nconst flights = new Map(), fx = [], flash = new Map();');
+replace("const linkW = e => 1.2 + Math.min(12, Math.sqrt(e.w) * 2.6);", "const linkW = e => 1.4 + Math.min(4, Math.sqrt(e.w) * 1.15);");
+replace("const rm = reduced(), K = rm ? 1 : .22;", "const rm = reduced(), K = rm ? 1 : 1 - Math.exp(-frameDelta / 110);");
+replace("!document.hidden && effLayout() === 'tabs' && view === 'flow'", "!document.hidden && flowVisible()");
+replace("return flights.size > 0 || fx.length > 0 || nodeAnim || fadeFlag || (flowVisible() && inflight.size > 0 && effLayout() === 'tabs');", "return flowVisible() && (flights.size > 0 || fx.length > 0 || nodeAnim || fadeFlag || inflight.size > 0);");
+replace('cancelAnimationFrame(rafId);\n  for', 'cancelAnimationFrame(rafId); rafId = 0; tmId = 0; lastDraw = 0;\n  for');
+replace("$('#retryConnection').onclick", "addEventListener('pageshow', e => { if (e.persisted) { stopped = false; cursor = null; pollNow(); kick(); } });\n$('#retryConnection').onclick");
+// Keep node shapes crisp and consistent with the dashboard controls.
+section('function nodeBox(', 'function drawNode(', `function nodeBox(n) {
+  const f = flash.get(n.key), fl = f ? clamp(1 - (animT - f.t) / 700, 0, 1) : 0;
+  const active = n.inf > 0;
+  X.fillStyle = mix(C.card, C.ter, active ? .72 : .32); rr(n.x, n.y - n.h / 2, n.w, n.h, 7); X.fill();
+  X.lineWidth = 1; X.strokeStyle = fl > .05 ? mix(C.border, C.err, fl) : active ? mix(C.border, C.info, .32) : C.border;
+  rr(n.x + .5, n.y - n.h / 2 + .5, n.w - 1, n.h - 1, 7); X.stroke();
+}
+`);
+replace('rr(x, y, w, h, 14)', 'rr(x, y, w, h, 8)');
+replace('rr(x + .75, y + .75, w - 1.5, h - 1.5, 14)', 'rr(x + .75, y + .75, w - 1.5, h - 1.5, 8)');
+replace('X.lineWidth = 1.5; X.strokeStyle = C.accent;', 'X.lineWidth = 1; X.strokeStyle = mix(C.border, C.accent, .6);');
+replace('get rafCount() { return rafCount; }', 'get rafCount() { return rafCount; }, get staticDraws() { return motionLayer.draws; }');
 replace("  if (!small) txt('线宽 = 近 60 秒请求速率（指数衰减）· 环 = 区间流量占比 / 失败 · 点击客户端展开 / 收起会话', W - 16, ly, lf, C.faint, 0, 'right');", '');
-replace("'近 ' + Math.round(rootTtl() / 60000) + ' 分钟没有会话 · 插件只能看到加载后经过 CPA 的请求'", "'No sessions in the last ' + Math.round(rootTtl() / 60000) + ' min'");
 replace("(viewEnd == null ? '近' + rangeLabel() : '窗口') + '请求'", "viewEnd == null ? 'Requests / ' + rangeLabel() : 'Requests / window'");
 replace("'区间内无请求' + (last ? ' · 上次请求 ' + ag + '前' : '')", "'No requests in this window' + (last ? ' / last request ' + ag + ' ago' : '')");
 const translations = {
@@ -133,7 +164,7 @@ replace('</style>', `
 .top { padding:16px 0 4px; min-height:48px; }
 .panel { border-radius:6px; box-shadow:none; }
 .chips { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; margin:14px 0 18px; }
-.chip { min-width:0; border:0; border-radius:0; border-left:2px solid var(--border-color); background:transparent; padding:4px 12px; }
+.chip { min-width:0; border:0; border-radius:0; border-left:1px solid var(--border-color); background:transparent; padding:4px 12px; }
 .chip b { font-size:20px; }
 .chip small { min-height:18px; overflow-wrap:anywhere; }
 .ctl { gap:6px; }
@@ -142,10 +173,25 @@ replace('</style>', `
 .mainp { border-left:0; border-right:0; border-radius:0; }
 .feed { border:0; border-left:1px solid var(--border-color); border-radius:0; background:transparent; }
 .feed h2 { gap:8px; flex-wrap:wrap; }
-.connection-error { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0; padding:12px; border-left:2px solid var(--warning); color:var(--warning); background:var(--bg-tertiary); }
+.connection-error { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0; padding:12px; border-left:1px solid var(--warning); color:var(--warning); background:var(--bg-tertiary); }
 @media(max-width:1150px) { .main { grid-template-columns:minmax(0,1fr); } .feed { contain:none; min-height:0; border-left:0; border-top:1px solid var(--border-color); } #list { display:block; } #list li:nth-child(n+7) { display:none; } }
 @media(max-width:600px) { .chips { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 8px; } .chip:last-child { grid-column:1 / -1; } .top { gap:10px; } .ctl { width:100%; } .ctl .seg { margin-left:0; padding-left:0; border:0; } .phead { gap:8px; padding:9px 4px; } .row { padding:10px 4px; } }
 </style>`);
+const presentation = await readFile(new URL('../web/token-monitor.css', import.meta.url), 'utf8');
+replace('</style>', presentation + '\n</style>');
+// Lucide icons, ISC license; paths vendored from lucide-react used by Token Monitor.
+const icon = name => `<svg class="control-icon" aria-hidden="true"><use href="#lr-${name}"/></svg>`;
+replace('<body>', `<body><svg class="icon-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
+<symbol id="lr-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></symbol>
+<symbol id="lr-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></symbol>
+<symbol id="lr-settings" viewBox="0 0 24 24"><path d="M10 5H3M12 19H3M14 3v4M16 17v4M21 12h-9M21 19h-5M21 5h-7M8 10v4M8 12H3"/></symbol>
+</defs></svg>`);
+replace('id="bPause" aria-pressed="false">Pause', `id="bPause" aria-pressed="false" aria-label="Pause" title="Pause animation">${icon('pause')}`);
+replace('id="bCfg" aria-pressed="false" aria-controls="cfgp">Configuration', `id="bCfg" aria-pressed="false" aria-controls="cfgp" aria-label="Configuration" title="Configuration">${icon('settings')}`);
+replace("e.currentTarget.textContent = paused ? 'Resume' : 'Pause';", `e.currentTarget.innerHTML = paused ? '${icon('play')}' : '${icon('pause')}'; e.currentTarget.setAttribute('aria-label', paused ? 'Resume' : 'Pause'); e.currentTarget.title = paused ? 'Resume animation' : 'Pause animation';`);
+replace("'Connected / paused' : 'Connected / live'", "'Paused' : 'Live traffic'");
+replace("'Credentials · OAuth / API · '", "'Credentials · '");
+replace("'CPA models'", "'Model routing'");
 replace("  readColors(); W =", `  let heightFrame = 0;
   const reportHeight = () => {
     cancelAnimationFrame(heightFrame);
@@ -158,4 +204,4 @@ replace("  readColors(); W =", `  let heightFrame = 0;
   readColors(); W =`);
 html = html.replace('<!doctype html>', '<!doctype html>\n<!-- Adapted from Roomen/cpa-live-routes (MIT). See LICENSE.txt and SOURCE.md. -->');
 await writeFile(new URL('../web/token-monitor.html', import.meta.url), html);
-console.log('Built web/token-monitor.html (English, same-origin data adapter, upstream Canvas renderer).');
+console.log('Built web/token-monitor.html (English, same-origin data adapter, smooth Canvas motion).');
