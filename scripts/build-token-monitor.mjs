@@ -89,9 +89,12 @@ replace("$('#retryConnection').onclick", "addEventListener('pageshow', e => { if
 section('function nodeBox(', 'function drawNode(', `function nodeBox(n) {
   const f = flash.get(n.key), fl = f ? clamp(1 - (animT - f.t) / 700, 0, 1) : 0;
   const active = n.inf > 0;
-  X.fillStyle = mix(C.card, C.ter, active ? .72 : .32); rr(n.x, n.y - n.h / 2, n.w, n.h, 7); X.fill();
-  X.lineWidth = 1; X.strokeStyle = fl > .05 ? mix(C.border, C.err, fl) : active ? mix(C.border, C.info, .32) : C.border;
-  rr(n.x + .5, n.y - n.h / 2 + .5, n.w - 1, n.h - 1, 7); X.stroke();
+  X.fillStyle = active ? mix(C.card, C.info, .16) : mix(C.card, C.ter, .32);
+  rr(n.x, n.y - n.h / 2, n.w, n.h, 7); X.fill();
+  const inset = active ? 1 : .5;
+  X.lineWidth = active ? 2 : 1;
+  X.strokeStyle = fl > .05 ? mix(C.border, C.err, fl) : active ? C.info : C.border;
+  rr(n.x + inset, n.y - n.h / 2 + inset, n.w - inset * 2, n.h - inset * 2, 7); X.stroke();
 }
 `);
 replace('rr(x, y, w, h, 14)', 'rr(x, y, w, h, 8)');

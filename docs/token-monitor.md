@@ -49,6 +49,8 @@ use upstream code. `web/token-monitor-motion.js` customizes presentation:
 - Arc-length sampling for uniform travel across unequal segments.
 - A cached static Canvas layer for links, labels and nodes; live packets draw separately.
 - Calm waiting markers, capped at five per port; the node's count remains exact.
+- Active bubbles have a cyan border and tinted fill; a small moving underline
+  renders separately from cached text, respecting pause and reduced motion.
 - Fast responses finish the outward presentation before the return animation.
 - Reduced-motion, pause, tab visibility and back/forward restoration are respected.
 

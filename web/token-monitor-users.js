@@ -21,6 +21,7 @@ function drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, 
   const userText = user ? fit(user.name, Math.max(0, iw * .7 - 16)) : '';
   const uw = userText ? X.measureText(userText).width + 16 : 0;
   const rightSpace = user ? uw + 5 : mini() ? 0 : bw + 6;
+  const countColor = n.inf > 0 ? C.info : C.faint;
   X.font = f1;
   const cw = Math.max(0, Math.min(iw - rightSpace, X.measureText(nm).width + 12 + dotW));
   if (cw > dotW + 6) {
@@ -34,21 +35,21 @@ function drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, 
     X.strokeStyle = user.color; X.lineWidth = 1;
     rr(ux + .5, uy + .5, uw - 1, 23, 5); X.stroke();
     txt(userText, ux + uw - 8, y, userFont, '#000000', 0, 'right');
-  } else if (!mini()) txt(badge, px + iw, l1, bf, C.faint, 0, 'right');
+  } else if (!mini()) txt(badge, px + iw, l1, bf, countColor, 0, 'right');
   const tg = sc ? (expanded.has(n.id) ? '▾ ' : '▸ ') + sc + ' sessions' : '';
   if (mini()) {
-    txt(badge, px + iw, l2, bf, C.faint, 0, 'right');
+    txt(badge, px + iw, l2, bf, countColor, 0, 'right');
     if (tg) txt(tg, px, l2, f2, C.info, Math.max(1, iw - bw - 4));
   } else if (three) {
     txt(cliSub(n.id), px, l2, f2, C.muted, iw);
     const bottom = y + h - 11;
-    if (user) txt(badge, px + iw, bottom, bf, C.faint, 0, 'right');
+    if (user) txt(badge, px + iw, bottom, bf, countColor, 0, 'right');
     if (tg) txt(tg, px, bottom, f2, C.info, Math.max(1, iw - (user ? bw + 4 : 0)));
   } else {
     X.font = f2;
     const countWidth = user ? bw + 5 : tg ? X.measureText(tg).width + 6 : 0;
     txt(cliSub(n.id), px, l2, f2, C.muted, Math.max(1, iw - countWidth));
-    if (user) txt(badge, px + iw, l2, bf, C.faint, 0, 'right');
+    if (user) txt(badge, px + iw, l2, bf, countColor, 0, 'right');
     else if (tg) txt(tg, px + iw, l2, f2, C.info, 0, 'right');
   }
 }

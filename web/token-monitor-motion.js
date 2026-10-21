@@ -26,6 +26,24 @@ let frameDelta = 1000 / 60;
 const motionPaths = new Map();
 const motionLayer = { canvas: null, key: '', rel: null, moving: false, draws: 0 };
 
+function drawActiveNodes() {
+  if (!animOn()) return;
+  X.save();
+  for (const type of ['c', 's', 'x']) for (const n of F.lists[type]) {
+    if (!(n.inf > 0) || n.h < 18 || n.w < 28) continue;
+    const width = n.w - 18, segment = Math.min(30, width * .35);
+    const phase = (animT / 2600 + n.id * .13) % 1;
+    const travel = .5 - .5 * Math.cos(phase * Math.PI * 2);
+    const y = n.y + n.h / 2 - 5;
+    X.globalAlpha = clamp(n.alpha, 0, 1) * dimN(n);
+    X.fillStyle = rgba(C.info, .22); rr(n.x + 9, y, width, 2, 1); X.fill();
+    X.globalAlpha *= .6 + .4 * Math.sin(phase * Math.PI) ** 2;
+    X.fillStyle = mix(C.info, '#ffffff', .65);
+    rr(n.x + 9 + (width - segment) * travel, y, segment, 2, 1); X.fill();
+  }
+  X.restore();
+}
+
 function motionPath(r) {
   const key = pathKeys(r).join('>');
   if (motionPaths.has(key)) return motionPaths.get(key);
@@ -167,7 +185,7 @@ function drawFlow(t) {
   }
   X = fctx; X.setTransform(dpr, 0, 0, dpr, 0, 0);
   X.drawImage(base, 0, 0, base.width, base.height, 0, 0, W, FH);
-  if (F.nodes.size) drawFlights();
+  if (F.nodes.size) { drawActiveNodes(); drawFlights(); }
 }
 
 /* @section loop */

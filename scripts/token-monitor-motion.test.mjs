@@ -78,7 +78,7 @@ test('stable nodes and text are cached between frames and invalidate on data or 
     sizeCv() {}, G: {}, W: 800, FH: 400, dpr: 1, dataVer: 1, lastCompute: 100,
     C: { card: '#000', accent: '#fff' }, rel: null, animT: 0, flash: new Map(),
     nodeAnim: false, fadeFlag: false, drawChrome() {}, drawLinks() {}, drawHub() {},
-    drawNode() { nodeDraws++; }, drawFlights() {},
+    drawNode() { nodeDraws++; }, drawFlights() {}, animOn: () => false,
     F: { sig: 'stable', nodes: new Map([['x', {}]]), lists: { c: [{}], s: [], x: [] } },
   };
   runInNewContext(helpers + extract('function drawFlow(', '/* flow interaction */'), context);
