@@ -66,7 +66,6 @@ const motion = await readFile(new URL('../web/token-monitor-motion.js', import.m
 const motionSections = Object.fromEntries([...motion.matchAll(/\/\* @section (\w+) \*\/\n([\s\S]*?)(?=\/\* @section |$)/g)].map((m) => [m[1], m[2]]));
 for (const [name, start, end] of [
   ['trackFlight', 'function trackFlight(', '/* ---------- flow model'],
-  ['drawLinks', 'function drawLinks()', 'function nodeBox('],
   ['drawFlights', 'function drawFlights()', 'function drawFlow('],
   ['drawFlow', 'function drawFlow(', '/* flow interaction */'],
   ['loop', 'function loop()', 'function render()'],
@@ -79,7 +78,6 @@ const users = await readFile(new URL('../web/token-monitor-users.js', import.met
 replace('  const fill = split ? 0 : fillH;', '  if (userLabels.size) G.gap = Math.max(G.gap, 24);\n  const fill = split ? 0 : fillH;');
 section("    const nm = mini() ? cliShort(n.id) : cliName(n.id), dotW = 14, sc = n.sess.size;", "  } else if (n.type === 's') {", '    drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, l1, l2);\n');
 replace("s += trow('harness',", "s += (clientUser(n.id) ? trow('User', clientUser(n.id).name) : '') + trow('harness',");
-replace("const linkW = e => 1.2 + Math.min(12, Math.sqrt(e.w) * 2.6);", "const linkW = e => 1.4 + Math.min(4, Math.sqrt(e.w) * 1.15);");
 replace("const rm = reduced(), K = rm ? 1 : .22;", "const rm = reduced(), K = rm ? 1 : 1 - Math.exp(-frameDelta / 110);");
 replace("!document.hidden && effLayout() === 'tabs' && view === 'flow'", "!document.hidden && flowVisible()");
 replace("return flights.size > 0 || fx.length > 0 || nodeAnim || fadeFlag || (flowVisible() && inflight.size > 0 && effLayout() === 'tabs');", "return flowVisible() && (flights.size > 0 || fx.length > 0 || nodeAnim || fadeFlag || inflight.size > 0);");

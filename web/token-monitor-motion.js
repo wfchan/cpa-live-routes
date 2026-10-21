@@ -81,30 +81,6 @@ function motionStart(path, point) {
   return path.lengths[best] / (path.length || 1);
 }
 
-/* @section drawLinks */
-function drawLinks() {
-  X.lineCap = 'round';
-  F.edges.forEach(e => {
-    const g = edgeG(e), quiet = e.w < .006;
-    const focused = !rel || rel.E.has(e.k), opacity = Math.min(e.alpha, 1) * (focused ? 1 : .2);
-    const path = () => { X.beginPath(); X.moveTo(g[0].x, g[0].y); X.bezierCurveTo(g[1].x, g[1].y, g[2].x, g[2].y, g[3].x, g[3].y); };
-    X.lineWidth = quiet ? 1 : linkW(e);
-    X.setLineDash(quiet ? [2, 6] : []);
-    X.globalAlpha = opacity * (quiet ? .26 : .66);
-    X.strokeStyle = mix(C.border, C.faint, quiet ? .2 : .28); path(); X.stroke();
-    if (!quiet) {
-      const errorShare = e.ew / (e.w + .001);
-      X.lineWidth = Math.max(1, linkW(e) - 1.5);
-      X.globalAlpha = opacity * Math.min(.42, e.w * .07);
-      X.strokeStyle = mix(C.ok, C.info, .22); path(); X.stroke();
-      if (errorShare > .03) {
-        X.globalAlpha = opacity * Math.min(.65, errorShare); X.strokeStyle = C.err; path(); X.stroke();
-      }
-    }
-  });
-  X.setLineDash([]); X.globalAlpha = 1;
-}
-
 /* @section drawFlights */
 function drawFlights() {
   if (!animOn()) return;

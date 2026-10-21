@@ -51,6 +51,8 @@ use upstream code. `web/token-monitor-motion.js` customizes presentation:
 - Calm waiting markers, capped at five per port; the node's count remains exact.
 - Active bubbles have a cyan border and tinted fill; a small moving underline
   renders separately from cached text, respecting pause and reduced motion.
+- Link width and traffic brightness use the original plugin renderer: recent
+  request volume thickens paths up to 13.2px, with the original 60-second decay.
 - Fast responses finish the outward presentation before the return animation.
 - Reduced-motion, pause, tab visibility and back/forward restoration are respected.
 
