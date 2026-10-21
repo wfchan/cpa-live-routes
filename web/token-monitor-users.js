@@ -33,7 +33,7 @@ function drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, 
     X.fillStyle = user.color; rr(ux, uy, uw, 24, 5); X.fill();
     X.strokeStyle = user.color; X.lineWidth = 1;
     rr(ux + .5, uy + .5, uw - 1, 23, 5); X.stroke();
-    txt(userText, ux + uw - 8, y, userFont, '#ffffff', 0, 'right');
+    txt(userText, ux + uw - 8, y, userFont, '#000000', 0, 'right');
   } else if (!mini()) txt(badge, px + iw, l1, bf, C.faint, 0, 'right');
   const tg = sc ? (expanded.has(n.id) ? '▾ ' : '▸ ') + sc + ' sessions' : '';
   if (mini()) {
