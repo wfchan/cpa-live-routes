@@ -8,6 +8,7 @@ function updateUserLabels(items) {
   userLabelsSignature = signature;
   userLabels = new Map(labels.map(u => [u.fp + ':' + u.mask, u]));
   motionLayer.key = '';
+  G = null;
 }
 function clientUser(id) {
   const client = D.clients.get(id), key = client && D.keys.get(client.key);
@@ -15,10 +16,10 @@ function clientUser(id) {
 }
 function drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, l1, l2) {
   const user = clientUser(n.id), nm = mini() ? cliShort(n.id) : cliName(n.id), dotW = 14, sc = n.sess.size;
-  const userFont = `600 ${small ? 9 : 10}px ${SANS}`;
+  const userFont = `700 ${small ? 12 : 13}px ${SANS}`;
   X.font = userFont;
-  const userText = user ? fit(user.name, Math.max(0, iw * .52 - 10)) : '';
-  const uw = userText ? X.measureText(userText).width + 10 : 0;
+  const userText = user ? fit(user.name, Math.max(0, iw * .7 - 16)) : '';
+  const uw = userText ? X.measureText(userText).width + 16 : 0;
   const rightSpace = user ? uw + 5 : mini() ? 0 : bw + 6;
   X.font = f1;
   const cw = Math.max(0, Math.min(iw - rightSpace, X.measureText(nm).width + 12 + dotW));
@@ -28,10 +29,11 @@ function drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, 
     txt(nm, px + 8 + dotW - 3, l1, f1, C.text, cw - dotW - 6);
   }
   if (userText) {
-    X.fillStyle = C.card; rr(px + iw - uw, l1 - 8, uw, 16, 4); X.fill();
+    const ux = x + w - uw - 4, uy = y - 12;
+    X.fillStyle = C.card; rr(ux, uy, uw, 24, 5); X.fill();
     X.strokeStyle = user.color; X.lineWidth = 1;
-    rr(px + iw - uw + .5, l1 - 7.5, uw - 1, 15, 4); X.stroke();
-    txt(userText, px + iw - 5, l1, userFont, C.text, 0, 'right');
+    rr(ux + .5, uy + .5, uw - 1, 23, 5); X.stroke();
+    txt(userText, ux + uw - 8, y, userFont, C.text, 0, 'right');
   } else if (!mini()) txt(badge, px + iw, l1, bf, C.faint, 0, 'right');
   const tg = sc ? (expanded.has(n.id) ? '▾ ' : '▸ ') + sc + ' sessions' : '';
   if (mini()) {

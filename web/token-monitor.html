@@ -603,6 +603,7 @@ function layoutFlow() {
   const split = effLayout() === 'split', small = W < 560, stack = !split && W < 760, ls = F.lists;
   G = split ? { top: small ? 24 : 28, bot: 8, nh: small ? 36 : 38, gap: 5, rh: small ? 17 : 19, hdr: small ? 22 : 26, foot: 0, pad: small ? 6 : 12, gx: small ? 14 : 36, max: 250, min: 80 }
     : { top: small ? 36 : 46, bot: small ? 30 : 34, nh: small ? 38 : 62, gap: small ? 8 : 12, rh: stack ? (small ? 32 : 36) : 28, hdr: small ? 34 : 42, foot: small ? 20 : 26, pad: small ? 6 : 16, gx: small ? 14 : 44, max: 660, min: small ? 150 : 300 };
+  if (userLabels.size) G.gap = Math.max(G.gap, 24);
   const fill = split ? 0 : fillH; if (fill) { G.min = Math.max(G.min, fill); G.max = Math.max(G.max, fill); }
   const X = fctx; X.font = `${small ? 9 : 11}px ${MONO}`;
   const rl = ls.r.map(n => D.rules.get(n.id));
@@ -733,6 +734,7 @@ function updateUserLabels(items) {
   userLabelsSignature = signature;
   userLabels = new Map(labels.map(u => [u.fp + ':' + u.mask, u]));
   motionLayer.key = '';
+  G = null;
 }
 function clientUser(id) {
   const client = D.clients.get(id), key = client && D.keys.get(client.key);
@@ -740,10 +742,10 @@ function clientUser(id) {
 }
 function drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, l1, l2) {
   const user = clientUser(n.id), nm = mini() ? cliShort(n.id) : cliName(n.id), dotW = 14, sc = n.sess.size;
-  const userFont = `600 ${small ? 9 : 10}px ${SANS}`;
+  const userFont = `700 ${small ? 12 : 13}px ${SANS}`;
   X.font = userFont;
-  const userText = user ? fit(user.name, Math.max(0, iw * .52 - 10)) : '';
-  const uw = userText ? X.measureText(userText).width + 10 : 0;
+  const userText = user ? fit(user.name, Math.max(0, iw * .7 - 16)) : '';
+  const uw = userText ? X.measureText(userText).width + 16 : 0;
   const rightSpace = user ? uw + 5 : mini() ? 0 : bw + 6;
   X.font = f1;
   const cw = Math.max(0, Math.min(iw - rightSpace, X.measureText(nm).width + 12 + dotW));
@@ -753,10 +755,11 @@ function drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, 
     txt(nm, px + 8 + dotW - 3, l1, f1, C.text, cw - dotW - 6);
   }
   if (userText) {
-    X.fillStyle = C.card; rr(px + iw - uw, l1 - 8, uw, 16, 4); X.fill();
+    const ux = x + w - uw - 4, uy = y - 12;
+    X.fillStyle = C.card; rr(ux, uy, uw, 24, 5); X.fill();
     X.strokeStyle = user.color; X.lineWidth = 1;
-    rr(px + iw - uw + .5, l1 - 7.5, uw - 1, 15, 4); X.stroke();
-    txt(userText, px + iw - 5, l1, userFont, C.text, 0, 'right');
+    rr(ux + .5, uy + .5, uw - 1, 23, 5); X.stroke();
+    txt(userText, ux + uw - 8, y, userFont, C.text, 0, 'right');
   } else if (!mini()) txt(badge, px + iw, l1, bf, C.faint, 0, 'right');
   const tg = sc ? (expanded.has(n.id) ? '▾ ' : '▸ ') + sc + ' sessions' : '';
   if (mini()) {

@@ -29,6 +29,6 @@ test('the data contract and flow layout retain the upstream algorithms', () => {
   ]) {
     const original = extract(upstream, start, end);
     assert.ok(original.length > 200, start);
-    assert.equal(extract(generated, start, end), original);
+    assert.equal(extract(generated, start, end).replace('  if (userLabels.size) G.gap = Math.max(G.gap, 24);\n', ''), original);
   }
 });

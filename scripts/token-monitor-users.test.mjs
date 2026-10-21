@@ -8,7 +8,7 @@ test('ownership requires both the plugin fingerprint and mask and refreshes cach
   const D = { clients: new Map([[1, { key: 1 }], [2, { key: 2 }], [3, { key: 1 }]]),
     keys: new Map([[1, { fp: 'aabbccdd', mask: 'sk-…1234' }], [2, { fp: 'aabbccdd', mask: 'sk-…9999' }]]) };
   const motionLayer = { key: 'cached' };
-  const api = runInNewContext(source + '\n({updateUserLabels,clientUser})', { D, motionLayer });
+  const api = runInNewContext(source + '\n({updateUserLabels,clientUser})', { D, motionLayer, G: {} });
   const label = { fp: 'aabbccdd', mask: 'sk-…1234', name: '<Alice>', color: '#22c55e' };
   api.updateUserLabels([label]);
   assert.equal(api.clientUser(1).name, '<Alice>');

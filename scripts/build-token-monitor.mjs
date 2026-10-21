@@ -76,6 +76,7 @@ for (const [name, start, end] of [
 }
 replace('const flights = new Map(), fx = [], flash = new Map();', motionSections.helpers + '\nconst flights = new Map(), fx = [], flash = new Map();');
 const users = await readFile(new URL('../web/token-monitor-users.js', import.meta.url), 'utf8');
+replace('  const fill = split ? 0 : fillH;', '  if (userLabels.size) G.gap = Math.max(G.gap, 24);\n  const fill = split ? 0 : fillH;');
 section("    const nm = mini() ? cliShort(n.id) : cliName(n.id), dotW = 14, sc = n.sess.size;", "  } else if (n.type === 's') {", '    drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, l1, l2);\n');
 replace("s += trow('harness',", "s += (clientUser(n.id) ? trow('User', clientUser(n.id).name) : '') + trow('harness',");
 replace("const linkW = e => 1.2 + Math.min(12, Math.sqrt(e.w) * 2.6);", "const linkW = e => 1.4 + Math.min(4, Math.sqrt(e.w) * 1.15);");
