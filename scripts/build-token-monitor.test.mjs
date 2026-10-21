@@ -15,6 +15,9 @@ test('the integrated page has valid JavaScript and a credential-free data adapte
   assert.match(script, /new URL\('\/api\/live-routes\/'/);
   assert.doesNotMatch(script, /managementKey|Authorization|sessionStorage|lr-key|indexedDB/);
   assert.match(script, /controller\.abort\(\)/);
+  assert.match(script, /function updateUserLabels\(items\)/);
+  assert.match(script, /function drawClient\(n,/);
+  assert.match(script, /updateUserLabels\(data.userLabels\)/);
 });
 
 test('the data contract and flow layout retain the upstream algorithms', () => {

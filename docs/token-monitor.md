@@ -26,6 +26,15 @@ CPA management credential server-side:
 - `GET /api/live-routes/events?since=<opaque cursor>`
 - `GET /api/live-routes/records?before=<opaque cursor>&limit=<1..2000>`
 
+Responses may add `userLabels: [{fp, mask, name, color}]`, derived server-side
+from Settings Users. `fp` is the first eight lowercase SHA-256 hex digits of the
+raw API key; `mask` follows the plugin's redaction rules. Never send raw keys.
+Exclude ambiguous fingerprints and project entries. The frontend requires both
+fingerprint and mask, refreshes ownership on every poll, and draws the user's
+name at the client bubble's upper right. Long names are ellipsized; the tooltip
+retains the full name. Counts remain separate. Settings are read-only here;
+traffic and identity mappings are not persisted by this frontend.
+
 Forward them to the matching `/v0/management/live-routes/` endpoints. Preserve the
 JSON contract, opaque cursors, epoch resets, eviction events, and errors. Do not
 use the dashboard's database snapshot cache, persist traffic, forward browser

@@ -723,6 +723,59 @@ function nodeBox(n) {
   X.lineWidth = 1; X.strokeStyle = fl > .05 ? mix(C.border, C.err, fl) : active ? mix(C.border, C.info, .32) : C.border;
   rr(n.x + .5, n.y - n.h / 2 + .5, n.w - 1, n.h - 1, 7); X.stroke();
 }
+// Settings ownership is refreshed with every poll; traffic dictionaries stay unchanged.
+let userLabels = new Map(), userLabelsSignature = '';
+function updateUserLabels(items) {
+  const labels = Array.isArray(items) ? items.filter(u => u && /^[a-f0-9]{8}$/.test(u.fp)
+    && typeof u.mask === 'string' && typeof u.name === 'string' && /^#[a-f0-9]{6}$/i.test(u.color)) : [];
+  const signature = JSON.stringify(labels);
+  if (signature === userLabelsSignature) return;
+  userLabelsSignature = signature;
+  userLabels = new Map(labels.map(u => [u.fp + ':' + u.mask, u]));
+  motionLayer.key = '';
+}
+function clientUser(id) {
+  const client = D.clients.get(id), key = client && D.keys.get(client.key);
+  return key ? userLabels.get(key.fp + ':' + key.mask) : undefined;
+}
+function drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, l1, l2) {
+  const user = clientUser(n.id), nm = mini() ? cliShort(n.id) : cliName(n.id), dotW = 14, sc = n.sess.size;
+  const userFont = `600 ${small ? 9 : 10}px ${SANS}`;
+  X.font = userFont;
+  const userText = user ? fit(user.name, Math.max(0, iw * .52 - 10)) : '';
+  const uw = userText ? X.measureText(userText).width + 10 : 0;
+  const rightSpace = user ? uw + 5 : mini() ? 0 : bw + 6;
+  X.font = f1;
+  const cw = Math.max(0, Math.min(iw - rightSpace, X.measureText(nm).width + 12 + dotW));
+  if (cw > dotW + 6) {
+    X.fillStyle = C.ter; rr(px, l1 - 9, cw, 18, 5); X.fill();
+    X.fillStyle = cliColor(n.id); X.beginPath(); X.arc(px + 8, l1, 3.2, 0, 7); X.fill();
+    txt(nm, px + 8 + dotW - 3, l1, f1, C.text, cw - dotW - 6);
+  }
+  if (userText) {
+    X.fillStyle = C.card; rr(px + iw - uw, l1 - 8, uw, 16, 4); X.fill();
+    X.strokeStyle = user.color; X.lineWidth = 1;
+    rr(px + iw - uw + .5, l1 - 7.5, uw - 1, 15, 4); X.stroke();
+    txt(userText, px + iw - 5, l1, userFont, C.text, 0, 'right');
+  } else if (!mini()) txt(badge, px + iw, l1, bf, C.faint, 0, 'right');
+  const tg = sc ? (expanded.has(n.id) ? '▾ ' : '▸ ') + sc + ' sessions' : '';
+  if (mini()) {
+    txt(badge, px + iw, l2, bf, C.faint, 0, 'right');
+    if (tg) txt(tg, px, l2, f2, C.info, Math.max(1, iw - bw - 4));
+  } else if (three) {
+    txt(cliSub(n.id), px, l2, f2, C.muted, iw);
+    const bottom = y + h - 11;
+    if (user) txt(badge, px + iw, bottom, bf, C.faint, 0, 'right');
+    if (tg) txt(tg, px, bottom, f2, C.info, Math.max(1, iw - (user ? bw + 4 : 0)));
+  } else {
+    X.font = f2;
+    const countWidth = user ? bw + 5 : tg ? X.measureText(tg).width + 6 : 0;
+    txt(cliSub(n.id), px, l2, f2, C.muted, Math.max(1, iw - countWidth));
+    if (user) txt(badge, px + iw, l2, bf, C.faint, 0, 'right');
+    else if (tg) txt(tg, px + iw, l2, f2, C.info, 0, 'right');
+  }
+}
+
 function drawNode(n) {
   const small = W < 560 || effLayout() === 'split', x = n.x, y = n.y - n.h / 2, w = n.w, h = n.h;
   X.save(); X.globalAlpha = clamp(n.alpha, 0, 1) * dimN(n);
@@ -731,16 +784,7 @@ function drawNode(n) {
   const f1 = `600 ${small ? 10.5 : 11.5}px ${SANS}`, f2 = `${small ? 9.5 : 11}px ${SANS}`, three = h >= 52;
   const l1 = three ? y + 15 : y + h * .32, l2 = three ? y + 33 : y + h * .72;
   if (n.type === 'c') {
-    const nm = mini() ? cliShort(n.id) : cliName(n.id), dotW = 14, sc = n.sess.size;
-    X.font = f1; const cw = Math.min(mini() ? iw : iw - bw - 6, X.measureText(nm).width + 12 + dotW);
-    X.fillStyle = C.ter; rr(px, l1 - 9, cw, 18, 5); X.fill();
-    X.fillStyle = cliColor(n.id); X.beginPath(); X.arc(px + 8, l1, 3.2, 0, 7); X.fill();
-    txt(nm, px + 8 + dotW - 3, l1, f1, C.text, cw - dotW - 6);
-    if (!mini()) txt(badge, px + iw, l1, bf, C.faint, 0, 'right');
-    const tg = sc ? (expanded.has(n.id) ? '▾ ' : '▸ ') + sc + ' sessions' : '';
-    if (mini()) { txt(badge, px + iw, l2, bf, C.faint, 0, 'right'); if (tg) txt(tg, px, l2, f2, C.info, iw - bw - 4); }
-    else if (three) { txt(cliSub(n.id), px, l2, f2, C.muted, iw); if (tg) txt(tg, px, y + h - 11, f2, C.info, iw); }
-    else { X.font = f2; const tw2 = tg ? X.measureText(tg).width + 6 : 0; txt(cliSub(n.id), px, l2, f2, C.muted, iw - tw2); if (tg) txt(tg, px + iw, l2, f2, C.info, 0, 'right'); }
+    drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, l1, l2);
   } else if (n.type === 's') {
     const ss = D.sessions.get(n.id), par = !n.kid && ss && ss.parent && D.sessions.get(ss.parent), p = n.kid && F.nodes.get('s' + n.par), one = h < 30;
     /* tree connector down the indent gutter from the root card; the last child's line ends at it (└), earlier ones are crossed (├) */
@@ -916,7 +960,7 @@ function nodeTip(h) {
   if (h.k === 'hub') return '<b>CPA</b>' + trow('Models', modelCount(F.lists.r));
   const n = h.n, rate = n.ok + n.fail >= 1 ? (n.ok / (n.ok + n.fail) * 100).toFixed(1) + '%' : '—';
   let s = `<b>${esc(nodeTitle(n))}</b>`;
-  if (n.type === 'c') { const c = D.clients.get(n.id); s += trow('harness', c ? c.kind : '—') + trow('Key / IP', cliSub(n.id) || '—') + trow('Sessions', n.sess.size) + (n.sess.size ? trow('', expanded.has(n.id) ? 'Collapse sessions' : 'Expand sessions') : ''); }
+  if (n.type === 'c') { const c = D.clients.get(n.id); s += (clientUser(n.id) ? trow('User', clientUser(n.id).name) : '') + trow('harness', c ? c.kind : '—') + trow('Key / IP', cliSub(n.id) || '—') + trow('Sessions', n.sess.size) + (n.sess.size ? trow('', expanded.has(n.id) ? 'Collapse sessions' : 'Expand sessions') : ''); }
   const ks = a => a.slice(0, 4).map(sessShort).join(' ') + (a.length > 4 ? ' …+' + (a.length - 4) : '');
   if (n.type === 's' && n.fold) s += trow('Collapsed subagents', ks(n.fold)) + trow('Parent session', sessShort(n.par));
   else if (n.type === 's') { const ss = D.sessions.get(n.id) || {}, par = ss.parent && D.sessions.get(ss.parent); s += trow('Session ID', ss.sid || '—') + trow('Parent session', par ? par.sid : 'None') + (n.kids ? trow('subagents (' + n.kids + ')', ks(n.kidIds)) + trow('Subagents in flight', n.kinf) : ''); }
@@ -1244,7 +1288,7 @@ async function call(path, params) {
   const controller = new AbortController(); pending.add(controller);
   try {
     const res = await fetch(u, { cache: 'no-store', credentials: 'same-origin', signal: controller.signal });
-    if (res.ok) return await res.json();
+    if (res.ok) { const data = await res.json(); updateUserLabels(data.userLabels); return data; }
     const err = new Error('Live data unavailable'); err.status = res.status; throw err;
   } finally { pending.delete(controller); }
 }

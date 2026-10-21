@@ -35,7 +35,7 @@ async function call(path, params) {
   const controller = new AbortController(); pending.add(controller);
   try {
     const res = await fetch(u, { cache: 'no-store', credentials: 'same-origin', signal: controller.signal });
-    if (res.ok) return await res.json();
+    if (res.ok) { const data = await res.json(); updateUserLabels(data.userLabels); return data; }
     const err = new Error('Live data unavailable'); err.status = res.status; throw err;
   } finally { pending.delete(controller); }
 }
@@ -75,6 +75,9 @@ for (const [name, start, end] of [
   section(start, end, motionSections[name] + '\n');
 }
 replace('const flights = new Map(), fx = [], flash = new Map();', motionSections.helpers + '\nconst flights = new Map(), fx = [], flash = new Map();');
+const users = await readFile(new URL('../web/token-monitor-users.js', import.meta.url), 'utf8');
+section("    const nm = mini() ? cliShort(n.id) : cliName(n.id), dotW = 14, sc = n.sess.size;", "  } else if (n.type === 's') {", '    drawClient(n, x, y, w, h, small, bf, badge, bw, px, iw, f1, f2, three, l1, l2);\n');
+replace("s += trow('harness',", "s += (clientUser(n.id) ? trow('User', clientUser(n.id).name) : '') + trow('harness',");
 replace("const linkW = e => 1.2 + Math.min(12, Math.sqrt(e.w) * 2.6);", "const linkW = e => 1.4 + Math.min(4, Math.sqrt(e.w) * 1.15);");
 replace("const rm = reduced(), K = rm ? 1 : .22;", "const rm = reduced(), K = rm ? 1 : 1 - Math.exp(-frameDelta / 110);");
 replace("!document.hidden && effLayout() === 'tabs' && view === 'flow'", "!document.hidden && flowVisible()");
@@ -91,6 +94,7 @@ section('function nodeBox(', 'function drawNode(', `function nodeBox(n) {
 }
 `);
 replace('rr(x, y, w, h, 14)', 'rr(x, y, w, h, 8)');
+replace('function drawNode(n) {', users + '\nfunction drawNode(n) {');
 replace('rr(x + .75, y + .75, w - 1.5, h - 1.5, 14)', 'rr(x + .75, y + .75, w - 1.5, h - 1.5, 8)');
 replace('X.lineWidth = 1.5; X.strokeStyle = C.accent;', 'X.lineWidth = 1; X.strokeStyle = mix(C.border, C.accent, .6);');
 replace('get rafCount() { return rafCount; }', 'get rafCount() { return rafCount; }, get staticDraws() { return motionLayer.draws; }');
